@@ -50,4 +50,4 @@ This setup allowed me to test and verify that the backend authentication middlew
 
 The following screenshot demonstrates a successful API request using the generated JWT token in Postman. The request to a protected route (e.g., `/todos`) was authorized and returned the expected response:
 
-![JWT Token Test Result](/Sydni_P_Donezo/screenshots/Screenshot%202025-07-13%20121734.png)
+![JWT Token Test Result](./screenshots/JWTresult.png)

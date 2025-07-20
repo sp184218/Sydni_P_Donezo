@@ -4,24 +4,21 @@ import { useForm } from "react-hook-form";
 import supabase from "../client";
 
 export default function Login() {
-  // 1. State to manage alert messages
   const [alert, showAlert] = useState({
     message: "",
     show: false,
   });
 
-  // 2. Hook to navigate programmatically
   const navigate = useNavigate();
 
-  // 3. Setup react-hook-form
-  const { register, handleSubmit } = useForm({
+  // Added formState to get errors
+  const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  // 4. Login function called on form submit
   const loginUser = async (values) => {
     const { error } = await supabase.auth.signInWithPassword(values);
 
@@ -35,13 +32,12 @@ export default function Login() {
     }
   };
 
-  // 5. Alert component for showing errors
   function LoginAlert() {
     return (
       <>
         {alert.show && (
           <div className="alert alert-error mb-4">
-            <div className="inline-flex justify-between items-center">
+            <div className="inline-flex justify-between items-center w-full">
               <span>{alert.message}</span>
               <button
                 onClick={() => showAlert({ message: "", show: false })}
@@ -56,7 +52,6 @@ export default function Login() {
     );
   }
 
-  // 6. LoginForm component with react-hook-form integration
   function LoginForm() {
     return (
       <form className="space-y-4" onSubmit={handleSubmit(loginUser)}>
@@ -68,8 +63,10 @@ export default function Login() {
             id="email"
             type="email"
             className="input input-bordered w-full"
-            {...register("email")}
+            {...register("email", { required: "Email is required" })}
           />
+          {/* Show error message for email */}
+          {errors.email && <p className="text-red-500 mt-1">{errors.email.message}</p>}
         </div>
 
         <div>
@@ -80,8 +77,10 @@ export default function Login() {
             id="password"
             type="password"
             className="input input-bordered w-full"
-            {...register("password")}
+            {...register("password", { required: "Password is required" })}
           />
+          {/* Show error message for password */}
+          {errors.password && <p className="text-red-500 mt-1">{errors.password.message}</p>}
         </div>
 
         <button type="submit" className="btn btn-primary w-full">
@@ -91,16 +90,12 @@ export default function Login() {
     );
   }
 
-  // 7. Render everything
   return (
     <div className="bg-gray-100 flex items-center justify-center min-h-screen">
       <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
-        {/* Show alert if there is one */}
         <LoginAlert />
-
-        {/* Show login form */}
         <LoginForm />
 
         <p className="mt-4 text-center text-sm">

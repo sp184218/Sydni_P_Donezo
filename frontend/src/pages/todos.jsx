@@ -1,38 +1,54 @@
 import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import supabase from "../client"; // Make sure this path is correct
 
 export default function Todos() {
   const queryClient = useQueryClient();
   const modalRef = useRef(null);
   const { register, handleSubmit, reset } = useForm();
 
-  // Toggle modal visibility
+  // Fetch Todos
+  const { data: todos, isLoading, isError } = useQuery({
+    queryKey: ['todos'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('todos').select('*').order('id', { ascending: false });
+      if (error) throw new Error(error.message);
+      return data;
+    },
+  });
+
+  // Mutation for new todos
+  const mutation = useMutation({
+    mutationFn: async (newTodo) => {
+      const { data, error } = await supabase.from('todos').insert([newTodo]);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['todos']);
+    },
+  });
+
+  // Modal toggler
   const toggleNewTodoModal = () => {
     if (!modalRef.current) return;
-    if (modalRef.current.open) {
-      modalRef.current.close();
-    } else {
-      modalRef.current.showModal();
-    }
+    modalRef.current.open ? modalRef.current.close() : modalRef.current.showModal();
   };
 
-  // Submit new todo (placeholder handler)
+  // Form submission
   const onSubmit = async (data) => {
-    console.log("Todo submitted:", data);
-    // You'll later use mutation here to send data to Supabase
-    reset(); // reset form fields
-    toggleNewTodoModal(); // close modal
+    mutation.mutate(data);
+    reset();
+    toggleNewTodoModal();
   };
 
-  // New Todo Button
   const NewTodoButton = () => (
     <button className="btn btn-primary" onClick={toggleNewTodoModal}>
       New Todo
     </button>
   );
 
-  // Todo Modal
   const TodoModal = () => (
     <dialog ref={modalRef} className="modal">
       <div className="modal-box">
@@ -74,12 +90,20 @@ export default function Todos() {
   );
 
   return (
-    <>
-      <div className="p-4">
-        <NewTodoButton />
-        <TodoModal />
-        {/* Todo list will go here later */}
+    <div className="p-4">
+      <NewTodoButton />
+      <TodoModal />
+      <div className="mt-6">
+        {isLoading && <p>Loading todos...</p>}
+        {isError && <p>Failed to load todos.</p>}
+        {todos?.length === 0 && <p>No todos found.</p>}
+        {todos?.map((todo) => (
+          <div key={todo.id} className="card bg-base-100 shadow-md p-4 my-2">
+            <h2 className="font-bold">{todo.name}</h2>
+            <p>{todo.description}</p>
+          </div>
+        ))}
       </div>
-    </>
+    </div>
   );
 }

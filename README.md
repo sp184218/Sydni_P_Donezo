@@ -1,7 +1,5 @@
 # Donezo Full Stack Application
 
-# Donezo Full Stack Application
-
 # Todo List Application with Authentication
 
 This project is a full-featured Todo List web application built with React, providing user authentication alongside comprehensive todo management functionality. Users can sign up, log in, and then create, view, complete, and delete todos. The app leverages modern React libraries and best practices to deliver a smooth and responsive user experience.

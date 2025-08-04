@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import getAxiosClient from "../axios-instance";
 
 export default function Todos() {
@@ -18,6 +20,10 @@ export default function Todos() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["todos"]);
+      toast.success("Todo created!");
+    },
+    onError: () => {
+      toast.error("Failed to create todo.");
     },
   });
 
@@ -31,6 +37,10 @@ export default function Todos() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["todos"]);
+      toast.success("Todo status updated!");
+    },
+    onError: () => {
+      toast.error("Failed to update todo.");
     },
   });
 
@@ -44,6 +54,10 @@ export default function Todos() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["todos"]);
+      toast.success("Todo deleted!");
+    },
+    onError: () => {
+      toast.error("Failed to delete todo.");
     },
   });
 
@@ -84,7 +98,7 @@ export default function Todos() {
         {todos.map((todo) => (
           <div
             key={todo.id}
-            className="card my-2 p-4 bg-base-100 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2"
+            className="card my-2 p-4 bg-base-100 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 transition-opacity duration-500 ease-in-out opacity-100 hover:opacity-90"
           >
             <div>
               <h4 className="text-xl font-semibold">{todo.title}</h4>
@@ -93,7 +107,7 @@ export default function Todos() {
 
             <div className="flex gap-4 items-center self-end sm:self-auto">
               {/* Toggle completion */}
-              <label className="swap swap-rotate">
+              <label className="swap swap-rotate cursor-pointer">
                 <input
                   type="checkbox"
                   checked={todo.completed}
@@ -105,7 +119,11 @@ export default function Todos() {
 
               {/* Delete button */}
               <button
-                onClick={() => deleteTodo(todo.id)}
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to delete this todo?")) {
+                    deleteTodo(todo.id);
+                  }
+                }}
                 className="btn btn-error btn-sm"
               >
                 Delete
@@ -157,6 +175,7 @@ export default function Todos() {
       <NewTodoButton />
       <TodoItemList />
       <TodoModal />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </main>
   );
 }

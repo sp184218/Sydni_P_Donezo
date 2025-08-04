@@ -1,12 +1,12 @@
 import axios from "axios";
-import supabase from "./client";
 
 const getAxiosClient = async () => {
-  const currentSession = await supabase.auth.getSession();
+  const token = localStorage.getItem("sb-access-token");
 
   const instance = axios.create({
+    baseURL: "http://localhost:8080", // add baseURL if you want
     headers: {
-      Authorization: `Bearer ${currentSession.data.session.access_token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 

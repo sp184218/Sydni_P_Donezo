@@ -11,7 +11,6 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  // Added formState to get errors
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       email: "",
@@ -20,7 +19,7 @@ export default function Login() {
   });
 
   const loginUser = async (values) => {
-    const { error } = await supabase.auth.signInWithPassword(values);
+    const { data, error } = await supabase.auth.signInWithPassword(values);
 
     if (error) {
       showAlert({
@@ -28,6 +27,12 @@ export default function Login() {
         message: error.message,
       });
     } else {
+      // Save tokens to localStorage for later use
+      localStorage.setItem("sb-access-token", data.session.access_token);
+      localStorage.setItem("sb-refresh-token", data.session.refresh_token);
+
+      console.log("Tokens saved:", localStorage.getItem("sb-access-token"));
+
       navigate("/todos");
     }
   };
@@ -65,7 +70,6 @@ export default function Login() {
             className="input input-bordered w-full"
             {...register("email", { required: "Email is required" })}
           />
-          {/* Show error message for email */}
           {errors.email && <p className="text-red-500 mt-1">{errors.email.message}</p>}
         </div>
 
@@ -79,7 +83,6 @@ export default function Login() {
             className="input input-bordered w-full"
             {...register("password", { required: "Password is required" })}
           />
-          {/* Show error message for password */}
           {errors.password && <p className="text-red-500 mt-1">{errors.password.message}</p>}
         </div>
 

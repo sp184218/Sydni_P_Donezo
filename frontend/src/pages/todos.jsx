@@ -30,11 +30,13 @@ export default function Todos() {
   // 🟢 Mark as completed mutation
   const { mutate: markAsCompleted } = useMutation({
     mutationKey: ["markAsCompleted"],
-    mutationFn: async (todoId) => {
-      const axiosInstance = await getAxiosClient();
-      const { data } = await axiosInstance.put(`http://localhost:8080/todos/${todoId}/completed`);
-      return data;
-    },
+   mutationFn: async ({ id, completed }) => {
+  const axiosInstance = await getAxiosClient();
+  const { data } = await axiosInstance.put(`http://localhost:8080/todos/${id}/completed`, {
+    completed: !completed, // toggle the current state
+  });
+  return data;
+},
     onSuccess: () => {
       queryClient.invalidateQueries(["todos"]);
       toast.success("Todo status updated!");
@@ -111,7 +113,8 @@ export default function Todos() {
                 <input
                   type="checkbox"
                   checked={todo.completed}
-                  onChange={() => markAsCompleted(todo.id)}
+                  onChange={() => markAsCompleted({ id: todo.id, completed: todo.completed })}
+
                 />
                 <div className="swap-on">✅</div>
                 <div className="swap-off">⬜</div>

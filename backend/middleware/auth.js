@@ -1,21 +1,27 @@
-//Put code here for the middleware to authenticate User requests if they have the token and check if it's a legit token
-
+// middleware/auth.js
 import jwt from 'jsonwebtoken';
 
+// Middleware to verify JWT token in Authorization header
 const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  // Expect header: Authorization: Bearer <token>
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1]; // Extract token
 
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // gotta be identical to .env
+    // Verify token using secret from environment variables
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Attach decoded payload (e.g., user id) to req.user for downstream use
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ error: 'Invalid token' });
+    console.error('Invalid token:', err);
+    return res.status(401).json({ error: 'Invalid token' });
   }
 };
 
 export default verifyToken;
+
